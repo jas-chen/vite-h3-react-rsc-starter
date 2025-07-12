@@ -1,17 +1,16 @@
 {
-  "name": "@vitejs/plugin-rsc-examples-starter",
+  "name": "vite-h3-react-rsc-starter",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "vite": "vite",
-    "h3": "NODE_ENV=production npx --yes listhen -w --port 3002 ./src/server.ts",
+    "dev": "NODE_ENV=development npx --yes listhen -w --port 3002 ./src/server.ts",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "NODE_ENV=production npx --yes listhen -w --port 3002 ./src/server.ts"
   },
   "dependencies": {
-    "@vitejs/plugin-rsc": "latest",
+    "@vitejs/plugin-rsc": "^0.4.11",
     "h3": "^1.15.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
@@ -20,7 +19,7 @@
     "@types/node": "^24.0.13",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "latest",
+    "@vitejs/plugin-react": "^4.6.0",
     "vite": "^7.0.2",
     "vite-plugin-inspect": "^11.3.0"
   }
