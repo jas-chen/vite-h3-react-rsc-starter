@@ -5,21 +5,23 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development npx --yes listhen -w --port 3002 ./src/server.ts",
-    "build": "vite build",
-    "preview": "NODE_ENV=production npx --yes listhen -w --port 3002 ./src/server.ts"
+    "dev": "NODE_ENV=development npx --yes listhen -w --port 3002 ./src/app.ts",
+    "build": "rm -rf ./dist && vite build && npx swc ./src/app.ts --out-file ./dist/app.mjs && cp ./src/server.mjs ./dist/server.mjs",
+    "preview": "NODE_ENV=production node ./dist/server.mjs"
   },
   "dependencies": {
-    "@vitejs/plugin-rsc": "^0.4.11",
     "h3": "^1.15.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@swc/cli": "^0.7.8",
+    "@swc/core": "^1.12.11",
     "@types/node": "^24.0.13",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
+    "@vitejs/plugin-rsc": "^0.4.11",
     "vite": "^7.0.2",
     "vite-plugin-inspect": "^11.3.0"
   }
