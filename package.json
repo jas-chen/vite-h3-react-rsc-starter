@@ -5,16 +5,19 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "vite": "vite",
+    "h3": "NODE_ENV=production npx --yes listhen -w --port 3002 ./src/server.ts",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "@vitejs/plugin-rsc": "latest",
+    "h3": "^1.15.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@types/node": "^24.0.13",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "latest",

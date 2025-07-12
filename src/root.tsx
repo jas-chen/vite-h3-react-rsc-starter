@@ -1,8 +1,8 @@
-import './index.css' // css import is automatically injected in exported server components
-import viteLogo from '/vite.svg'
-import { getServerCounter, updateServerCounter } from './action.tsx'
-import reactLogo from './assets/react.svg'
-import { ClientCounter } from './client.tsx'
+import "./index.css"; // css import is automatically injected in exported server components
+import viteLogo from "./assets/vite.svg";
+import { getServerCounter, updateServerCounter } from "./action.tsx";
+import reactLogo from "./assets/react.svg";
+import { ClientCounter } from "./client.tsx";
 
 export function Root() {
   return (
@@ -17,7 +17,7 @@ export function Root() {
         <App />
       </body>
     </html>
-  )
+  );
 }
 
 function App() {
@@ -51,20 +51,20 @@ function App() {
           Edit <code>src/root.tsx</code> to test server HMR.
         </li>
         <li>
-          Visit{' '}
+          Visit{" "}
           <a href="/?__rsc" target="_blank">
             <code>/?__rsc</code>
-          </a>{' '}
+          </a>{" "}
           to view RSC stream payload.
         </li>
         <li>
-          Visit{' '}
+          Visit{" "}
           <a href="/?__nojs" target="_blank">
             <code>/?__nojs</code>
-          </a>{' '}
+          </a>{" "}
           to test server action without js enabled.
         </li>
       </ul>
     </div>
-  )
+  );
 }
