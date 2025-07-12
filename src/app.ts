@@ -1,5 +1,4 @@
 // Based on https://github.com/bluwy/create-vite-extra/blob/master/template-ssr-react-streaming-ts/server.js
-
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
@@ -12,7 +11,6 @@ import {
   fromNodeMiddleware,
 } from "h3";
 
-const ABORT_DELAY = 10000;
 const isProduction = process.env.NODE_ENV === "production";
 const base = process.env.BASE || "/";
 
@@ -93,74 +91,4 @@ if (isProduction) {
   };
   router.get("/**", fromWebHandler(handler));
   router.post("/**", fromWebHandler(handler));
-} else {
-  router.get(
-    "/**",
-    defineEventHandler(async (event) => {
-      try {
-        const url = event.node.req.url!.replace(base, "");
-        const render = (await vite.ssrLoadModule("/src/framework/entry.rsc"))
-          .render;
-
-        return new Promise((resolve) => {
-          let didError = false;
-          const { pipe, abort } = render(url, {
-            onShellError(err: any) {
-              didError = true;
-              console.error(err);
-              resolve(
-                new Response("<h1>Something went wrong</h1>", {
-                  status: 500,
-                  headers: { "Content-Type": "text/html" },
-                })
-              );
-            },
-            onShellReady() {
-              const stream = new ReadableStream({
-                start(controller) {
-                  pipe({
-                    write(chunk: any) {
-                      controller.enqueue(chunk);
-                    },
-                    close() {
-                      controller.close();
-                    },
-                    error(err: any) {
-                      didError = true;
-                      console.error(err);
-                    },
-                  });
-                },
-              });
-
-              resolve(
-                new Response(stream, {
-                  status: didError ? 500 : 200,
-                  headers: { "Content-Type": "text/html" },
-                })
-              );
-            },
-          });
-
-          setTimeout(() => {
-            abort();
-          }, ABORT_DELAY);
-        });
-      } catch (e: unknown) {
-        console.error(e);
-
-        if (e instanceof Error) {
-          vite?.ssrFixStacktrace(e);
-          return new Response(e.stack || "<h1>Something went wrong</h1>", {
-            status: 500,
-          });
-        } else {
-          return new Response("<h1>Something went wrong</h1>", {
-            status: 500,
-            headers: { "Content-Type": "text/html" },
-          });
-        }
-      }
-    })
-  );
 }
