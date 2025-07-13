@@ -1,6 +1,8 @@
 import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { Readable } from "node:stream";
+import { match } from "./router.js";
 import {
   createApp,
   createRouter,
@@ -42,19 +44,25 @@ if (!isProduction) {
   const handler = async (request: Request) => {
     const { pathname } = new URL(request.url);
 
+    if (match(pathname)) {
+      const { default: handler } =
+        // @ts-expect-error
+        await import("../../dist/rsc/index.js");
+      return handler(request);
+    }
+
     try {
-      if (pathname.endsWith("/")) {
-        throw { code: "ENOENT" };
-      }
       const filePath = join(publicDir, pathname);
 
       if (!filePath.startsWith(publicDir)) {
-        return new Response("Forbidden", { status: 403 });
+        return new Response(null, { status: 403 });
       }
+
+      // check if file exists
+      await stat(filePath);
 
       const nodeStream = createReadStream(filePath);
       const webStream = Readable.toWeb(nodeStream);
-
       const contentType =
         mimeTypes[extname(filePath)] || "application/octet-stream";
 
@@ -68,14 +76,12 @@ if (!isProduction) {
         }
       );
     } catch (error: unknown) {
-      if (error && (error as { code: string }).code === "ENOENT") {
-        const { default: handler } =
-          // @ts-expect-error
-          await import("../../dist/rsc/index.js");
-        return handler(request);
+      if ((error as { code: string }).code === "ENOENT") {
+        return new Response(null, { status: 404 });
       }
 
-      throw error;
+      console.error(error);
+      return new Response(null, { status: 500 });
     }
   };
 
