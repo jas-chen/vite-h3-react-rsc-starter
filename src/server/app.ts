@@ -1,12 +1,10 @@
 import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 import { Readable } from "node:stream";
 import {
   createApp,
   createRouter,
   fromWebHandler,
-  defineEventHandler,
   fromNodeMiddleware,
 } from "h3";
 
@@ -26,43 +24,36 @@ if (!isProduction) {
   });
   app.use(fromNodeMiddleware(vite.middlewares));
 } else {
+  const mimeTypes: Record<string, string> = {
+    ".js": "application/javascript",
+    ".css": "text/css",
+    ".json": "application/json",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".svg": "image/svg+xml",
+    ".ico": "image/x-icon",
+  };
+
   const router = createRouter();
+  const publicDir = resolve(process.cwd(), "dist", "public");
 
-  // TODO: compress static files
-  router.get(
-    "/assets/**",
-    defineEventHandler(async (event) => {
-      const assetsDir = resolve(process.cwd(), "dist", "client", "assets");
-      const assetPath = event.path.substring("/assets/".length);
-      const filePath = join(assetsDir, assetPath);
+  const handler = async (request: Request) => {
+    const { pathname } = new URL(request.url);
 
-      if (!filePath.startsWith(assetsDir)) {
-        return new Response("Forbidden", { status: 403 });
+    try {
+      if (pathname.endsWith("/")) {
+        throw { code: "ENOENT" };
       }
+      const filePath = join(publicDir, pathname);
 
-      try {
-        await stat(filePath);
-      } catch (error) {
-        if ((error as { code: string }).code === "ENOENT") {
-          return new Response("Not Found", { status: 404 });
-        }
-        throw error;
+      if (!filePath.startsWith(publicDir)) {
+        return new Response("Forbidden", { status: 403 });
       }
 
       const nodeStream = createReadStream(filePath);
       const webStream = Readable.toWeb(nodeStream);
-
-      const mimeTypes: Record<string, string> = {
-        ".js": "application/javascript",
-        ".css": "text/css",
-        ".json": "application/json",
-        ".png": "image/png",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".gif": "image/gif",
-        ".svg": "image/svg+xml",
-        ".ico": "image/x-icon",
-      };
 
       const contentType =
         mimeTypes[extname(filePath)] || "application/octet-stream";
@@ -76,14 +67,16 @@ if (!isProduction) {
           },
         }
       );
-    })
-  );
+    } catch (error: unknown) {
+      if (error && (error as { code: string }).code === "ENOENT") {
+        const { default: handler } =
+          // @ts-expect-error
+          await import("../../dist/rsc/index.js");
+        return handler(request);
+      }
 
-  const handler = async (request: Request) => {
-    const { default: handler } =
-      // @ts-expect-error
-      await import("../rsc/index.js");
-    return handler(request);
+      throw error;
+    }
   };
 
   router.get("/**", fromWebHandler(handler));
