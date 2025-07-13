@@ -1,4 +1,3 @@
-// Based on https://github.com/bluwy/create-vite-extra/blob/master/template-ssr-react-streaming-ts/server.js
 import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
@@ -15,7 +14,6 @@ const isProduction = process.env.NODE_ENV === "production";
 const base = process.env.BASE || "/";
 
 export const app = createApp();
-const router = createRouter();
 
 let vite: Awaited<ReturnType<typeof import("vite").createServer>>;
 
@@ -28,6 +26,8 @@ if (!isProduction) {
   });
   app.use(fromNodeMiddleware(vite.middlewares));
 } else {
+  const router = createRouter();
+
   // TODO: compress static files
   router.get(
     "/assets/**",
@@ -78,17 +78,16 @@ if (!isProduction) {
       );
     })
   );
-}
 
-app.use(router);
-
-if (isProduction) {
   const handler = async (request: Request) => {
     const { default: handler } =
       // @ts-expect-error
-      await import("../dist/rsc/index.js");
+      await import("../rsc/index.js");
     return handler(request);
   };
+
   router.get("/**", fromWebHandler(handler));
   router.post("/**", fromWebHandler(handler));
+
+  app.use(router);
 }

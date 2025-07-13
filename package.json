@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development npx --yes listhen -w --port 3002 ./src/app.ts",
-    "build": "rm -rf ./dist && vite build && npx swc ./src/app.ts --out-file ./dist/app.mjs && cp ./src/server.mjs ./dist/server.mjs",
-    "preview": "NODE_ENV=production node ./dist/server.mjs"
+    "build": "rm -rf dist && vite build && npx swc src/server -d dist --strip-leading-paths",
+    "preview": "NODE_ENV=production node dist/server/index.js"
   },
   "dependencies": {
     "h3": "^1.15.3",
