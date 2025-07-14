@@ -1,8 +1,4 @@
-import { createReadStream } from "node:fs";
-import { stat } from "node:fs/promises";
-import { extname, join, resolve } from "node:path";
-import { Readable } from "node:stream";
-import { match } from "./router.js";
+import express from "express";
 import {
   createApp,
   createRouter,
@@ -26,67 +22,29 @@ if (!isProduction) {
   });
   app.use(fromNodeMiddleware(vite.middlewares));
 } else {
-  const mimeTypes: Record<string, string> = {
-    ".js": "application/javascript",
-    ".css": "text/css",
-    ".json": "application/json",
-    ".png": "image/png",
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".gif": "image/gif",
-    ".svg": "image/svg+xml",
-    ".ico": "image/x-icon",
+  // @ts-expect-error response type mismatch
+  app.use(fromNodeMiddleware(express.static("dist/public")));
+  // @ts-expect-error response type mismatch
+  app.use("/assets", fromNodeMiddleware(express.static("dist/client/assets")));
+
+  const renderHandler = async (request: Request) => {
+    const { pathname } = new URL(request.url);
+
+    if (pathname === "/.well-known/appspecific/com.chrome.devtools.json") {
+      return new Response(null, { status: 404 });
+    }
+
+    const { default: rscHandler } =
+      // @ts-expect-error
+      await import("../../dist/rsc/index.js");
+    return rscHandler(request);
   };
 
   const router = createRouter();
-  const publicDir = resolve(process.cwd(), "dist", "public");
 
-  const handler = async (request: Request) => {
-    const { pathname } = new URL(request.url);
-
-    if (match(pathname)) {
-      const { default: handler } =
-        // @ts-expect-error
-        await import("../../dist/rsc/index.js");
-      return handler(request);
-    }
-
-    try {
-      const filePath = join(publicDir, pathname);
-
-      if (!filePath.startsWith(publicDir)) {
-        return new Response(null, { status: 403 });
-      }
-
-      // check if file exists
-      await stat(filePath);
-
-      const nodeStream = createReadStream(filePath);
-      const webStream = Readable.toWeb(nodeStream);
-      const contentType =
-        mimeTypes[extname(filePath)] || "application/octet-stream";
-
-      return new Response(
-        // @ts-expect-error
-        webStream,
-        {
-          headers: {
-            "Content-Type": contentType,
-          },
-        }
-      );
-    } catch (error: unknown) {
-      if ((error as { code: string }).code === "ENOENT") {
-        return new Response(null, { status: 404 });
-      }
-
-      console.error(error);
-      return new Response(null, { status: 500 });
-    }
-  };
-
-  router.get("/**", fromWebHandler(handler));
-  router.post("/**", fromWebHandler(handler));
+  router
+    .get("/**", fromWebHandler(renderHandler))
+    .post("/**", fromWebHandler(renderHandler));
 
   app.use(router);
 }
