@@ -23,7 +23,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
-    "@vitejs/plugin-rsc": "^0.4.11",
+    "@vitejs/plugin-rsc": "^0.4.12",
     "vite": "^7.0.2",
     "vite-plugin-inspect": "^11.3.0"
   }
