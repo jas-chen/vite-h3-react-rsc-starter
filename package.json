@@ -10,18 +10,18 @@
     "preview": "NODE_ENV=production node dist/server/index.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
     "h3": "^1.15.3",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "serve-static": "^2.2.0"
   },
   "devDependencies": {
     "@swc/cli": "^0.7.8",
     "@swc/core": "^1.12.11",
-    "@types/express": "^5.0.3",
     "@types/node": "^24.0.13",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "@types/serve-static": "^1.15.8",
     "@vitejs/plugin-react": "^4.6.0",
     "@vitejs/plugin-rsc": "^0.4.12",
     "vite": "^7.0.2",

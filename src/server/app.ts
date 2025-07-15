@@ -1,4 +1,4 @@
-import express from "express";
+import serveStatic from "serve-static";
 import {
   createApp,
   createRouter,
@@ -22,10 +22,8 @@ if (!isProduction) {
   });
   app.use(fromNodeMiddleware(vite.middlewares));
 } else {
-  // @ts-expect-error response type mismatch
-  app.use(fromNodeMiddleware(express.static("dist/public")));
-  // @ts-expect-error response type mismatch
-  app.use("/assets", fromNodeMiddleware(express.static("dist/client/assets")));
+  app.use(fromNodeMiddleware(serveStatic("dist/public")));
+  app.use("/assets", fromNodeMiddleware(serveStatic("dist/client/assets")));
 
   const renderHandler = async (request: Request) => {
     const { pathname } = new URL(request.url);
