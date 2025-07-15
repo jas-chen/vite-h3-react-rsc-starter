@@ -22,27 +22,23 @@ if (!isProduction) {
   });
   app.use(fromNodeMiddleware(vite.middlewares));
 } else {
-  app.use(fromNodeMiddleware(serveStatic("dist/public")));
+  // Serve RSC assets
   app.use("/assets", fromNodeMiddleware(serveStatic("dist/client/assets")));
 
-  const renderHandler = async (request: Request) => {
-    const { pathname } = new URL(request.url);
+  // Serve static assets
+  app.use(fromNodeMiddleware(serveStatic("dist/public")));
 
-    if (pathname === "/.well-known/appspecific/com.chrome.devtools.json") {
-      return new Response(null, { status: 404 });
-    }
-
-    const { default: rscHandler } =
-      // @ts-expect-error
-      await import("../../dist/rsc/index.js");
-    return rscHandler(request);
-  };
+  const rscHandler = fromWebHandler(async (request: Request) => {
+    // @ts-expect-error
+    return (await import("../../dist/rsc/index.js")).default(request);
+  });
 
   const router = createRouter();
 
-  router
-    .get("/**", fromWebHandler(renderHandler))
-    .post("/**", fromWebHandler(renderHandler));
+  router.get("/**", rscHandler);
+
+  // Handle RSC actions
+  router.post("/**", rscHandler);
 
   app.use(router);
 }
