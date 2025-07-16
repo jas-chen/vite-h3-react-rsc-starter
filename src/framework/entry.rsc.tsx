@@ -35,7 +35,7 @@ export default async function handler(request: Request): Promise<Response> {
       temporaryReferences = ReactServer.createTemporaryReferenceSet();
       const args = await ReactServer.decodeReply(body, { temporaryReferences });
       const action = await ReactServer.loadServerAction(actionId);
-      returnValue = await action.apply(null, args);
+      returnValue = await action.apply(request, args);
     } else {
       // otherwise server function is called via `<form action={...}>`
       // before hydration (e.g. when javascript is disabled).
@@ -53,7 +53,7 @@ export default async function handler(request: Request): Promise<Response> {
   // to achieve single round trip to mutate and fetch from server.
   const rscStream = ReactServer.renderToReadableStream<RscPayload>({
     // in this example, we always render the same `<Root />`
-    root: <Root />,
+    root: <Root request={request} />,
     returnValue,
     formState,
   });
