@@ -37,7 +37,7 @@ if (!isProduction) {
 
   router.get("/**", rscHandler);
 
-  // Handle React server actions
+  // Handle React Server Functions
   router.post("/**", rscHandler);
 
   app.use(router);

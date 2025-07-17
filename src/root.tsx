@@ -11,7 +11,7 @@ export function Root() {
         <meta charSet="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="/vite.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Vite + RSC</title>
+        <title>Vite + h3 + RSC</title>
       </head>
       <body>
         <App />
@@ -34,7 +34,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + RSC</h1>
+      <h1>Vite + h3 + RSC</h1>
       <div className="card">
         <ClientCounter />
       </div>
