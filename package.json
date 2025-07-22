@@ -13,6 +13,7 @@
     "h3": "^1.15.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "rsc-html-stream": "^0.0.7",
     "serve-static": "^2.2.0"
   },
   "devDependencies": {
